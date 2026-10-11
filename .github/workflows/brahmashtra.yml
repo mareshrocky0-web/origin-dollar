@@ -1,4 +1,4 @@
-herename: Maha-Brahmashtra Ultimate 12-Tools Global Security Pipeline
+name: Maha-Brahmashtra Ultimate 12-Tools Global Security Pipeline
 
 on: [push, pull_request]
 
@@ -38,7 +38,6 @@ jobs:
           ignore-compile: true
         continue-on-error: true
 
-     
       - name: Run Aderyn Advanced Scan
         run: |
           cargo install aderyn || pip install aderyn || true
@@ -51,7 +50,6 @@ jobs:
           solhint "contracts/**/*.sol" || true
         continue-on-error: true
 
-     
       - name: Run Foundry & Echidna Fuzz Attacks
         run: |
           cd contracts || true
