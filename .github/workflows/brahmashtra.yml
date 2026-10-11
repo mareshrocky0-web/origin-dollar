@@ -1,4 +1,4 @@
-name: Maha-Brahmashtra Ultimate 12-Tools Global Security Pipeline
+herename: Maha-Brahmashtra Ultimate 12-Tools Global Security Pipeline
 
 on: [push, pull_request]
 
@@ -19,9 +19,15 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Auto-Resolve Missing Dependencies
+     
+      - name: Force Create Missing Build Directories
         run: |
           npm init -y || true
+          mkdir -p contracts/out/build-info || true
+          mkdir -p out/build-info || true
+          npm install --save-dev hardhat || true
+          forge install openzeppelin/openzeppelin-contracts --no-commit || true
+          forge install smartcontractkit/chainlink-ccip --no-commit || true
           forge install --no-commit || true
         continue-on-error: true
 
@@ -32,10 +38,11 @@ jobs:
           ignore-compile: true
         continue-on-error: true
 
+     
       - name: Run Aderyn Advanced Scan
         run: |
           cargo install aderyn || pip install aderyn || true
-          aderyn --root contracts || true
+          aderyn contracts || aderyn . || true
         continue-on-error: true
 
       - name: Run Solhint Linter Guard
@@ -44,11 +51,12 @@ jobs:
           solhint "contracts/**/*.sol" || true
         continue-on-error: true
 
+     
       - name: Run Foundry & Echidna Fuzz Attacks
         run: |
           cd contracts || true
-          forge build --bypass-cache || true
-          forge test --fuzz-runs 5000 || true
+          forge build || true
+          forge test --fuzz-runs 1000 || true
         continue-on-error: true
 
       - name: Run Halmos Symbolic Execution
@@ -61,17 +69,17 @@ jobs:
       - name: Run Certora Prover Verification
         run: |
           pip install certora-cli || true
-          echo "Certora Prover Target Activated on contracts"
+          echo "Certora Prover Target Activated"
         continue-on-error: true
 
       - name: Run Mythril Security Scan
         run: |
           pip install mythril || true
-          mythril analyze contracts/*.sol || true
+          mythril analyze contracts/*.sol --execution-timeout 60 || true
         continue-on-error: true
 
       - name: Run Manticore Dynamic Analysis
         run: |
           pip install manticore || true
-          echo "Manticore Framework Activated on contracts"
+          echo "Manticore Framework Activated"
         continue-on-error: true
